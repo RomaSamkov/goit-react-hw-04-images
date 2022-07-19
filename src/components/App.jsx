@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { Container } from './App.styled';
 import Button from './Button';
 import ImageInfo from './ImageInfo';
@@ -7,63 +7,58 @@ import Searchbar from './Searchbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export class App extends Component {
-  state = {
-    showModal: false,
-    searchQuery: '',
-    page: 1,
-    src: '',
-    alt: '',
-    moreVisible: false,
-  };
+export const App = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [src, setSrc] = useState('');
+  const [alt, setAlt] = useState('');
+  const [moreVisible, setMoreVisible] = useState(false);
 
-  toggleModal = e => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
-
-    if (!this.state.showModal) {
-      this.setState({ src: e.target.dataset.src, alt: e.target.alt });
+  const toggleModal = e => {
+    if (!showModal) {
+      setSrc(e.target.dataset.src);
+      setAlt(e.target.alt);
+      setShowModal(true);
+    } else {
+      setShowModal(false);
     }
   };
 
-  submitForm = e => {
-    this.setState({ page: 1 });
-    this.setState({ searchQuery: e.value });
+  const submitForm = value => {
+    setPage(1);
+    setSearchQuery(value);
   };
 
-  showMoreButton = () => {
-    this.setState({ moreVisible: true });
+  const showMoreButton = () => {
+    setMoreVisible(true);
   };
-  hideMoreButton = () => {
-    this.setState({ moreVisible: false });
-  };
-
-  clickMoreButton = e => {
-    this.setState(prevState => {
-      return { page: prevState.page + 1 };
-    });
+  const hideMoreButton = () => {
+    setMoreVisible(false);
   };
 
-  render() {
-    const { showModal, moreVisible, searchQuery, page, src, alt } = this.state;
-    return (
-      <Container>
-        <Searchbar onSubmit={this.submitForm} />
-        <ImageInfo
-          searchQuery={searchQuery}
-          page={page}
-          onClick={this.toggleModal}
-          showMoreButton={this.showMoreButton}
-          hideMoreButton={this.hideMoreButton}
-        />
-        {moreVisible && <Button onClick={this.clickMoreButton} />}
+  const clickMoreButton = () => {
+    setPage(page => page + 1);
+  };
 
-        {showModal && (
-          <Modal onClose={this.toggleModal}>
-            <img src={src} alt={alt} />
-          </Modal>
-        )}
-        <ToastContainer />
-      </Container>
-    );
-  }
-}
+  return (
+    <Container>
+      <Searchbar onSubmit={submitForm} />
+      <ImageInfo
+        searchQuery={searchQuery}
+        page={page}
+        onClick={toggleModal}
+        showMoreButton={showMoreButton}
+        hideMoreButton={hideMoreButton}
+      />
+      {moreVisible && <Button onClick={clickMoreButton} />}
+
+      {showModal && (
+        <Modal onClose={toggleModal}>
+          <img src={src} alt={alt} />
+        </Modal>
+      )}
+      <ToastContainer />
+    </Container>
+  );
+};
