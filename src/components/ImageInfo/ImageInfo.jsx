@@ -76,7 +76,7 @@ const ImageInfo = ({
         }
       })();
     }
-  }, [hideMoreButton, hits, page, searchQuery, showMoreButton]);
+  }, [page, searchQuery]);
 
   return (
     <>
