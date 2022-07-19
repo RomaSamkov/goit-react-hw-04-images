@@ -26,6 +26,9 @@ const ImageInfo = ({
   const [hits, setHits] = useState([]);
   const [showLoader, setShowLoader] = useState(false);
 
+  const unusable = { status, error, totalHits };
+  unusable();
+
   const openShowLoader = () => {
     setShowLoader(true);
   };
