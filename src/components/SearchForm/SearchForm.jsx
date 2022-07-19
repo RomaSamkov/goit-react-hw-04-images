@@ -1,42 +1,40 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ButtonForm, ButtonLabel, Form, Input } from './SearchForm.styled';
 import { FaSearch } from 'react-icons/fa';
 
-class SearchForm extends Component {
-  state = { value: '' };
+const SearchForm = ({ onSubmit }) => {
+  const [value, setValue] = useState('');
 
-  handleChange = e => {
+  const handleChange = e => {
     const { value } = e.currentTarget;
-    this.setState({ value: value });
+    setValue(value);
   };
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    this.props.onSubmit(this.state);
+    onSubmit(value);
   };
 
-  render() {
-    return (
-      <Form onSubmit={this.handleSubmit}>
-        <ButtonForm type="submit" onSubmit={this.handleSubmit}>
-          <FaSearch size={30}></FaSearch>
-          <ButtonLabel>Search</ButtonLabel>
-        </ButtonForm>
+  return (
+    <Form onSubmit={handleSubmit}>
+      <ButtonForm type="submit" onSubmit={handleSubmit}>
+        <FaSearch size={30}></FaSearch>
+        <ButtonLabel>Search</ButtonLabel>
+      </ButtonForm>
 
-        <Input
-          type="text"
-          name="query"
-          value={this.state.value}
-          onChange={this.handleChange}
-          autoComplete="off"
-          autoFocus
-          placeholder="Search images and photos"
-        />
-      </Form>
-    );
-  }
-}
+      <Input
+        type="text"
+        name="query"
+        value={value}
+        onChange={handleChange}
+        autoComplete="off"
+        autoFocus
+        placeholder="Search images and photos"
+      />
+    </Form>
+  );
+};
 
 SearchForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,

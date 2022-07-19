@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getImages } from 'services/api';
 import ImageGallery from 'components/ImageGallery';
@@ -13,92 +13,80 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-class ImageInfo extends Component {
-  state = {
-    status: Status.IDLE,
-    error: null,
-    totalHits: null,
-    hits: [],
+const ImageInfo = ({
+  onClick,
+  searchQuery,
+  page,
+  showMoreButton,
+  hideMoreButton,
+}) => {
+  const [status, setStatus] = useState(Status.IDLE);
+  const [error, setError] = useState(null);
+  const [totalHits, setTotalHits] = useState(null);
+  const [hits, setHits] = useState([]);
+  const [showLoader, setShowLoader] = useState(false);
+
+  const openShowLoader = () => {
+    setShowLoader(true);
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    const prevSearchQuery = prevProps.searchQuery;
-    const nextSearchQuery = this.props.searchQuery;
-    const prevPage = prevProps.page;
-    const nextPage = this.props.page;
+  const closeShowLoader = () => {
+    setShowLoader(false);
+  };
 
-    if (
-      (prevSearchQuery.trim() !== nextSearchQuery.trim() &&
-        nextSearchQuery.trim().length > 0) ||
-      nextPage > prevPage
-    ) {
-      this.setState({
-        status: Status.PENDING,
-      });
-      this.props.hideMoreButton();
-      try {
-        const { totalHits, hits } = await getImages(nextSearchQuery, nextPage);
-        if (totalHits === 0) {
-          toast.error(
-            `Failed to find any images with name ${nextSearchQuery}. Try other words.`
+  useEffect(() => {
+    if (searchQuery) {
+      (async () => {
+        try {
+          openShowLoader();
+          const { totalHits: newTotalHits, hits: newHits } = await getImages(
+            searchQuery,
+            page
           );
+          closeShowLoader();
+          if (newTotalHits === 0) {
+            hideMoreButton();
+            toast.error(
+              `Failed to find any images with name ${searchQuery}. Try other words.`
+            );
+          }
+          if (
+            newTotalHits === hits.length + newHits.length ||
+            (newTotalHits > 0 && newTotalHits <= 12)
+          ) {
+            hideMoreButton();
+          }
+          if (newTotalHits > hits.length + newHits.length) {
+            showMoreButton();
+          }
+          if (page > 1) {
+            setHits([...newHits, ...hits]);
+            setStatus(Status.RESOLVED);
+          }
+          if (page === 1) {
+            setHits(newHits);
+            setStatus(Status.RESOLVED);
+            setTotalHits(newTotalHits);
+          }
+        } catch (error) {
+          setError(error);
+          setStatus(Status.REJECTED);
+          hideMoreButton();
+          toast.error(`Sorry, something went wrong.`);
         }
-        if (totalHits === this.state.hits.length + hits.length) {
-          this.props.hideMoreButton();
-        }
-        if (totalHits > this.state.hits.length + hits.length) {
-          this.props.showMoreButton();
-        }
-        if (nextPage > 1) {
-          this.setState({
-            hits: [...prevState.hits, ...hits],
-            status: Status.RESOLVED,
-            totalHits: totalHits,
-          });
-        }
-        if (nextPage === 1) {
-          this.setState({
-            hits: hits,
-            status: Status.RESOLVED,
-            totalHits: totalHits,
-          });
-        }
-      } catch (error) {
-        this.setState({
-          error,
-          status: Status.REJECTED,
-        });
-        this.props.hideMoreButton();
-        toast.error(`Sorry, something went wrong.`);
-      }
+      })();
     }
-  }
+  }, [page, searchQuery]);
 
-  render() {
-    const { hits, status } = this.state;
-    if (status === 'idle') {
-      return;
-    }
-    if (status === 'pending') {
-      return (
-        <>
-          <ImageGallery hits={hits} onClick={this.props.onClick} />
-          <Loader />
-        </>
-      );
-    }
-    if (status === 'rejected') {
-      return;
-    }
-    if (status === 'resolved') {
-      return (
-        <>
-          <ImageGallery hits={hits} onClick={this.props.onClick} />
-        </>
-      );
-    }
-  }
-}
+  return (
+    <>
+      {Status.IDLE && <div></div>}
+      {Status.REJECTED && <div></div>}
+      {Status.RESOLVED && <ImageGallery hits={hits} onClick={onClick} />}
+      {showLoader ? <Loader /> : null}
+    </>
+  );
+};
 
 ImageInfo.propTypes = {
   onClick: PropTypes.func.isRequired,
