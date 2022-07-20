@@ -2,18 +2,22 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ButtonForm, ButtonLabel, Form, Input } from './SearchForm.styled';
 import { FaSearch } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const SearchForm = ({ onSubmit }) => {
-  const [value, setValue] = useState('');
+  const [query, setQuery] = useState('');
 
-  const handleChange = e => {
-    const { value } = e.currentTarget;
-    setValue(value);
+  const handleInputChange = e => {
+    setQuery(e.target.value.toLowerCase());
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    onSubmit(value);
+    if (query.trim() === '') {
+      toast.error('Enter what images you want !');
+      return;
+    }
+    onSubmit(query);
   };
 
   return (
@@ -26,8 +30,8 @@ const SearchForm = ({ onSubmit }) => {
       <Input
         type="text"
         name="query"
-        value={value}
-        onChange={handleChange}
+        value={query}
+        onChange={handleInputChange}
         autoComplete="off"
         autoFocus
         placeholder="Search images and photos"

@@ -5,7 +5,7 @@ import { ModalContent, Overlay } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modalRoot');
 
-const Modal = ({ onClose, children }) => {
+const Modal = ({ onClose, selectedImg }) => {
   useEffect(() => {
     const handleKeyEscape = e => {
       if (e.code === 'Escape') {
@@ -26,7 +26,9 @@ const Modal = ({ onClose, children }) => {
 
   return createPortal(
     <Overlay onClick={handleBackdropClick}>
-      <ModalContent>{children}</ModalContent>
+      <ModalContent>
+        <img src={selectedImg} alt="SelectedImage" />
+      </ModalContent>
     </Overlay>,
     modalRoot
   );
@@ -34,7 +36,7 @@ const Modal = ({ onClose, children }) => {
 
 Modal.propTypes = {
   onClose: PropTypes.func.isRequired,
-  children: PropTypes.node,
+  picture: PropTypes.string.isRequired,
 };
 
 export default Modal;
