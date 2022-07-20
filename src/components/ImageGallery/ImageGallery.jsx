@@ -30,12 +30,12 @@ const ImageGallery = ({ images }) => {
   return (
     <>
       <Gallery onClick={toggleModal}>
-        {images.map(img => {
+        {images.map(image => {
           return (
             <ImageGalleryItem
-              key={img.id}
-              id={img.id}
-              smallImgURL={img.webformatURL}
+              key={image.id}
+              id={image.id}
+              smallImgURL={image.webformatURL}
             />
           );
         })}
